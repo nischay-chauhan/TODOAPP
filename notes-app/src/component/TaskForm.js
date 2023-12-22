@@ -10,15 +10,19 @@ import {
   Spacer,
   IconButton,
 } from "@chakra-ui/react";
-import { useState, React, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
+import EditForm from "./EditForm";
 import axios from "axios";
+
 const TaskForm = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [task, setTasks] = useState([]);
+  const [isEditFormOpen, setIsEditFormOpen] = useState(false);
+  const [editTaskId, setEditTaskId] = useState(null);
 
-  const handleAddTask = async (e) => {
+  const handleAddTask = async () => {
     try {
       const response = await axios.post("http://localhost:5000/api/tasks", {
         title,
@@ -30,7 +34,7 @@ const TaskForm = () => {
       setTitle("");
       setDescription("");
     } catch (error) {
-      console.log("error addign tasks", error);
+      console.log("Error adding tasks", error);
     }
   };
 
@@ -40,24 +44,62 @@ const TaskForm = () => {
         const response = await axios.get("http://localhost:5000/api/tasks");
         setTasks(response.data);
       } catch (error) {
-        console.log("Got some error while fetching tasks", error);
+        console.log("Error fetching tasks", error);
       }
     };
 
     fetchTasks();
   }, []);
 
+  const handleDeleteTask = async (taskId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/tasks/${taskId}`,
+        {
+          method: "DELETE",
+        }
+      );
 
-  
+      if (response.ok) {
+        console.log("Task Deleted");
+      }
+      setTasks((prevTasks) => prevTasks.filter((task) => task._id !== taskId));
+    } catch (error) {
+      console.log("Error while deleting", error);
+    }
+  };
+
+  const handleEditTask = (taskId) => {
+    setEditTaskId(taskId);
+    setIsEditFormOpen(true);
+  };
+
+  const handleSubmitEditForm = async (editedTitle, editedDescription) => {
+    try {
+      const response = await axios.put(
+        `http://localhost:5000/api/tasks/${editTaskId}`,
+        {
+          title: editedTitle,
+          description: editedDescription,
+        }
+      );
+
+      const updatedTasks = task.map((task) =>
+        task._id === editTaskId ? response.data : task
+      );
+      setTasks(updatedTasks);
+      console.log("Task Updated", response.data);
+    } catch (error) {
+      console.log("Error updating task", error);
+    }
+  };
 
   return (
     <Box
-      padding={["4", "8"]}
-      spacing={["2", "8"]}
+      p={["4", "8"]}
       bg="purple.700"
-      p="8"
       borderRadius="md"
-      width={{ base: "00%", md: "70%", lg: "50%" }}
+      width="70%"
       mx="auto"
       my="4"
       boxShadow="lg"
@@ -65,7 +107,7 @@ const TaskForm = () => {
       <Text fontSize="xl" mb="4" color="yellow.300" textAlign="center">
         Add Task
       </Text>
-      <Stack spacing="8">
+      <Stack spacing={["4", "8"]}>
         <Input
           placeholder="Task Title"
           value={title}
@@ -77,7 +119,6 @@ const TaskForm = () => {
           borderLeft="none"
           borderRight="none"
         />
-
         <Input
           placeholder="Task Description"
           value={description}
@@ -88,58 +129,73 @@ const TaskForm = () => {
           borderTop="none"
           borderLeft="none"
           borderRight="none"
-          height={"75px"}
+          height={["50px", "75px"]}
         />
       </Stack>
       <Button
         colorScheme="teal"
         onClick={handleAddTask}
         leftIcon={<FaPlus />}
-        mt={10}
-        w={"100%"}
+        mt={["6", "10"]}
+        w="100%"
+        mb={["4", "4"]}
       >
         Add
       </Button>
-
       <VStack
- direction="row"
- align="start"
- wrap="wrap"
- spacing={4}
- px={2}
- width="100%"
->
- {task.map((task, index) => (
-    <Box
-      key={index}
-      borderWidth="1px"
-      borderRadius="lg"
-      overflow="hidden"
-      p="6"
-      width={{ base: '100%', md: '50%', lg: '33%' }}
-    >
-    <HStack justify="space-between">
-        <Heading size="md">{task.title}</Heading>
-        <Spacer />
-        <HStack spacing={2}>
-          <IconButton
-            colorScheme="teal"
-            aria-label="Edit"
-            icon={<FaEdit />}
-            size="sm"
-          />
-          <IconButton
-            colorScheme="red"
-            aria-label="Delete"
-            icon={<FaTrash />}
-            size="sm"
-          />
-        </HStack>
-      </HStack>
-      <Text mt="4">{task.description}</Text>
-    </Box>
-  ))}
-</VStack>
+        direction={["column", "row"]}
+        align="start"
+        wrap="wrap"
+        spacing={4}
+        px={2}
+        width="120%"
+      >
+        {task.map((task, index) => (
+          <Box
+            key={index}
+            borderWidth="0.5px"
+            borderRadius="sm"
+            // overflow="hidden"
+            p="4"
+            width={{ base: "100%", md: "50%", lg: "33%" }}
+            height="130px"  
+            overflowY="auto" 
+          >
+            <HStack justify="space-between">
+              <Heading size="md">{task.title}</Heading>
+              <Spacer />
+              <HStack spacing={2}>
+                <IconButton
+                  colorScheme="teal"
+                  aria-label="Edit"
+                  icon={<FaEdit />}
+                  size="sm"
+                  onClick={() => handleEditTask(task._id)}
+                />
+                <IconButton
+                  colorScheme="red"
+                  aria-label="Delete"
+                  icon={<FaTrash />}
+                  size="sm"
+                  onClick={() => handleDeleteTask(task._id)}
+                />
+              </HStack>
+            </HStack>
+            <Text mt="2">{task.description}</Text>
+          </Box>
+        ))}
+      </VStack>
+      {isEditFormOpen && (
+        <EditForm
+          isOpen={isEditFormOpen}
+          onClose={() => setIsEditFormOpen(false)}
+          onSubmit={handleSubmitEditForm}
+          initialTitle={task.find((task) => task._id === editTaskId)?.title}
+          initialDescription={
+            task.find((task) => task._id === editTaskId)?.description
+          }
+        />
+      )}
     </Box>
   );
 };
