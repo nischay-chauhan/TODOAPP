@@ -1,6 +1,6 @@
 import React from 'react';
 import { ChakraProvider, CSSReset, Box, Container, VStack, Text } from '@chakra-ui/react';
-import './App.css'; // Import external CSS
+import './App.css'; 
 import TaskForm from './component/TaskForm';
 
 
@@ -10,7 +10,7 @@ const App = () => {
       <CSSReset />
       <Box
         bgGradient="linear(to-r, purple.500, yellow.500)"
-        minH="80vh"
+        minH="100%"
         position="relative"
         overflow="hidden"
         textAlign="center"
