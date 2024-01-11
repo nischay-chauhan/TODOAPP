@@ -13,8 +13,8 @@ import {
 import { useState, useEffect } from "react";
 import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
 import EditForm from "./EditForm";
-import axios from "axios";
-import {toast} from "react-hot-toast"; 
+import { toast } from "react-hot-toast";
+import * as api from "../helper/helper"; 
 
 const TaskForm = () => {
   const [title, setTitle] = useState("");
@@ -23,54 +23,43 @@ const TaskForm = () => {
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
   const [editTaskId, setEditTaskId] = useState(null);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const tasks = await api.fetchTasks();
+        setTasks(tasks);
+      } catch (error) {
+        console.error("Error fetching tasks", error);
+        toast.error("Error", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   const handleAddTask = async () => {
     try {
-      const response = await axios.post("http://localhost:5000/api/tasks", {
-        title,
-        description,
-      });
-      console.log("Task Added", response.data);
-      toast.success("Added SuccessFully")
-      setTasks((prevTasks) => [...prevTasks, response.data]);
+      const newTask = await api.addTask(title, description);
+      console.log("Task Added", newTask);
+      toast.success("Added Successfully");
+      setTasks((prevTasks) => [...prevTasks, newTask]);
       setTitle("");
       setDescription("");
     } catch (error) {
       console.error("Error adding tasks", error);
-      toast.error("KINDLY ADD THE TITLE"); 
+      toast.error("KINDLY ADD THE TITLE");
     }
   };
 
-  useEffect(() => {
-    const fetchTasks = async () => {
-      try {
-        const response = await axios.get("http://localhost:5000/api/tasks");
-        setTasks(response.data);
-      } catch (error) {
-        console.error("Error fetching tasks", error);
-        toast.error("Error" , error); 
-      }
-    };
-
-    fetchTasks();
-  }, []);
-
   const handleDeleteTask = async (taskId) => {
     try {
-      const response = await fetch(
-        `http://localhost:5000/api/tasks/${taskId}`,
-        {
-          method: "DELETE",
-        }
-      );
-
-      if (response.ok) {
-        console.log("Task Deleted");
-        toast.success("Deleted SuccessFully")
-      }
+      await api.deleteTask(taskId);
+      console.log("Task Deleted");
+      toast.success("Deleted Successfully");
       setTasks((prevTasks) => prevTasks.filter((task) => task._id !== taskId));
     } catch (error) {
       console.error("Error while deleting", error);
-      toast.error("Error " , error); 
+      toast.error("Error", error);
     }
   };
 
@@ -81,23 +70,21 @@ const TaskForm = () => {
 
   const handleSubmitEditForm = async (editedTitle, editedDescription) => {
     try {
-      const response = await axios.put(
-        `http://localhost:5000/api/tasks/${editTaskId}`,
-        {
-          title: editedTitle,
-          description: editedDescription,
-        }
+      const updatedTask = await api.editTask(
+        editTaskId,
+        editedTitle,
+        editedDescription
       );
 
       const updatedTasks = task.map((task) =>
-        task._id === editTaskId ? response.data : task
+        task._id === editTaskId ? updatedTask : task
       );
       setTasks(updatedTasks);
-      console.log("Task Updated", response.data);
-      toast.success("Updated SuccessFully")
+      console.log("Task Updated", updatedTask);
+      toast.success("Updated Successfully");
     } catch (error) {
       console.error("Error updating task", error);
-      toast.error("Error" , error); 
+      toast.error("Error", error);
     }
   };
 
