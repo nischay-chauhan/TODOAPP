@@ -30,7 +30,7 @@ router.put('/:id' , async(req , res) => {
 
     try{
         const updateTask = await Task.findByIdAndUpdate(taskId , {title , description} , {new : true});
-        res.json(updateTask);
+        res.json(updateTask);   
     }catch(error){
         console.log(error);
         res.status(500).json({error : 'Internal Server Error'})

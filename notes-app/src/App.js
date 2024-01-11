@@ -2,7 +2,7 @@ import React from 'react';
 import { ChakraProvider, CSSReset, Box, Container, VStack, Text } from '@chakra-ui/react';
 import './App.css'; 
 import TaskForm from './component/TaskForm';
-
+import {Toaster} from 'react-hot-toast'
 
 const App = () => {
   return (
@@ -15,9 +15,11 @@ const App = () => {
         overflow="hidden"
         textAlign="center"
         >
+         <Toaster />
         <VStack
         spacing={8} align="center"
         >
+           
         <Text
           color="white"
           fontSize="5xl"

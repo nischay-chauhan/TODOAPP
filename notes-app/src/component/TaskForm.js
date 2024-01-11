@@ -14,6 +14,7 @@ import { useState, useEffect } from "react";
 import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
 import EditForm from "./EditForm";
 import axios from "axios";
+import {toast} from "react-hot-toast"; 
 
 const TaskForm = () => {
   const [title, setTitle] = useState("");
@@ -28,13 +29,14 @@ const TaskForm = () => {
         title,
         description,
       });
-
       console.log("Task Added", response.data);
+      toast.success("Added SuccessFully")
       setTasks((prevTasks) => [...prevTasks, response.data]);
       setTitle("");
       setDescription("");
     } catch (error) {
-      console.log("Error adding tasks", error);
+      console.error("Error adding tasks", error);
+      toast.error("KINDLY ADD THE TITLE"); 
     }
   };
 
@@ -44,7 +46,8 @@ const TaskForm = () => {
         const response = await axios.get("http://localhost:5000/api/tasks");
         setTasks(response.data);
       } catch (error) {
-        console.log("Error fetching tasks", error);
+        console.error("Error fetching tasks", error);
+        toast.error("Error" , error); 
       }
     };
 
@@ -62,10 +65,12 @@ const TaskForm = () => {
 
       if (response.ok) {
         console.log("Task Deleted");
+        toast.success("Deleted SuccessFully")
       }
       setTasks((prevTasks) => prevTasks.filter((task) => task._id !== taskId));
     } catch (error) {
-      console.log("Error while deleting", error);
+      console.error("Error while deleting", error);
+      toast.error("Error " , error); 
     }
   };
 
@@ -89,9 +94,15 @@ const TaskForm = () => {
       );
       setTasks(updatedTasks);
       console.log("Task Updated", response.data);
+      toast.success("Updated SuccessFully")
     } catch (error) {
-      console.log("Error updating task", error);
+      console.error("Error updating task", error);
+      toast.error("Error" , error); 
     }
+  };
+
+  const isHeadingValid = (heading) => {
+    return heading.length <= 30;
   };
 
   return (
@@ -103,13 +114,16 @@ const TaskForm = () => {
       mx="auto"
       my="4"
       boxShadow="lg"
+      textAlign="center"
     >
+     
       <Text fontSize="xl" mb="4" color="yellow.300" textAlign="center">
         Add Task
       </Text>
       <Stack spacing={["4", "8"]}>
         <Input
           placeholder="Task Title"
+          color={"white"}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           size="sm"
@@ -124,6 +138,7 @@ const TaskForm = () => {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           size="sm"
+          color={"white"}
           borderBottom="2px"
           borderBottomColor="linear(to-r, purple.500, yellow.500)"
           borderTop="none"
@@ -154,17 +169,18 @@ const TaskForm = () => {
           <Box
             key={index}
             borderWidth="0.5px"
-            borderRadius="sm"
-            // overflow="hidden"
+            borderRadius="25px"
             p="4"
-            width={{ base: "100%", md: "50%", lg: "33%" }}
-            height="130px"  
-            overflowY="auto" 
+            width="70%"
+            height="130px"
+            overflowY="auto"
           >
             <HStack justify="space-between">
-              <Heading size="md">{task.title}</Heading>
+              <Heading size="md">
+                {isHeadingValid(task.title) ? task.title : "Invalid Heading"}
+              </Heading>
               <Spacer />
-              <HStack spacing={2}>
+              <HStack spacing={["2", "4"]}>
                 <IconButton
                   colorScheme="teal"
                   aria-label="Edit"
