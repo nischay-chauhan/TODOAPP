@@ -14,23 +14,24 @@ import { useState, useEffect } from "react";
 import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
 import EditForm from "./EditForm";
 import { toast } from "react-hot-toast";
-import * as api from "../helper/helper"; 
+import * as api from "../helper/helper";
 
 const TaskForm = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [task, setTasks] = useState([]);
+  const [tasks, setTasks] = useState([]);
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
   const [editTaskId, setEditTaskId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const tasks = await api.fetchTasks();
-        setTasks(tasks);
+        const fetchedTasks = await api.fetchTasks();
+        setTasks(fetchedTasks);
       } catch (error) {
         console.error("Error fetching tasks", error);
-        toast.error("Error", error);
+        toast.error("Error fetching tasks");
       }
     };
 
@@ -47,7 +48,7 @@ const TaskForm = () => {
       setDescription("");
     } catch (error) {
       console.error("Error adding tasks", error);
-      toast.error("KINDLY ADD THE TITLE");
+      toast.error("Error adding tasks");
     }
   };
 
@@ -59,7 +60,7 @@ const TaskForm = () => {
       setTasks((prevTasks) => prevTasks.filter((task) => task._id !== taskId));
     } catch (error) {
       console.error("Error while deleting", error);
-      toast.error("Error", error);
+      toast.error("Error deleting task");
     }
   };
 
@@ -76,7 +77,7 @@ const TaskForm = () => {
         editedDescription
       );
 
-      const updatedTasks = task.map((task) =>
+      const updatedTasks = tasks.map((task) =>
         task._id === editTaskId ? updatedTask : task
       );
       setTasks(updatedTasks);
@@ -84,13 +85,17 @@ const TaskForm = () => {
       toast.success("Updated Successfully");
     } catch (error) {
       console.error("Error updating task", error);
-      toast.error("Error", error);
+      toast.error("Error updating task");
     }
   };
 
   const isHeadingValid = (heading) => {
     return heading.length <= 30;
   };
+
+  const filteredTasks = tasks.filter((task) =>
+    task.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <Box
@@ -103,7 +108,6 @@ const TaskForm = () => {
       boxShadow="lg"
       textAlign="center"
     >
-     
       <Text fontSize="xl" mb="4" color="yellow.300" textAlign="center">
         Add Task
       </Text>
@@ -144,6 +148,20 @@ const TaskForm = () => {
       >
         Add
       </Button>
+      <Input
+        placeholder="Search by Title"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        size="sm"
+        color={"white"}
+        borderBottom="2px"
+        borderBottomColor="linear(to-r, purple.500, yellow.500)"
+        borderTop="none"
+        borderLeft="none"
+        borderRight="none"
+        mb={["6", "10"]}
+        mt={["6", "10"]}
+      />
       <VStack
         direction={["column", "row"]}
         align="start"
@@ -152,7 +170,7 @@ const TaskForm = () => {
         px={2}
         width="120%"
       >
-        {task.map((task, index) => (
+        {filteredTasks.map((task, index) => (
           <Box
             key={index}
             borderWidth="0.5px"
@@ -193,9 +211,9 @@ const TaskForm = () => {
           isOpen={isEditFormOpen}
           onClose={() => setIsEditFormOpen(false)}
           onSubmit={handleSubmitEditForm}
-          initialTitle={task.find((task) => task._id === editTaskId)?.title}
+          initialTitle={tasks.find((task) => task._id === editTaskId)?.title}
           initialDescription={
-            task.find((task) => task._id === editTaskId)?.description
+            tasks.find((task) => task._id === editTaskId)?.description
           }
         />
       )}
