@@ -13,7 +13,7 @@ nodejs for backend and React and chakra UI for the frontend.
 - You can add your Todos.
 - You can update your Todos.
 - You can delete your Todos.
-
+- You can search your Todos by Title.
 
 
 ## Run Locally
