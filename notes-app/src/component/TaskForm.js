@@ -162,50 +162,56 @@ const TaskForm = () => {
         mb={["6", "10"]}
         mt={["6", "10"]}
       />
-      <VStack
-        direction={["column", "row"]}
-        align="start"
-        wrap="wrap"
-        spacing={4}
-        px={2}
-        width="120%"
-      >
-        {filteredTasks.map((task, index) => (
-          <Box
-            key={index}
-            borderWidth="0.5px"
-            borderRadius="25px"
-            p="4"
-            width="70%"
-            height="130px"
-            overflowY="auto"
-          >
-            <HStack justify="space-between">
-              <Heading size="md">
-                {isHeadingValid(task.title) ? task.title : "Invalid Heading"}
-              </Heading>
-              <Spacer />
-              <HStack spacing={["2", "4"]}>
-                <IconButton
-                  colorScheme="teal"
-                  aria-label="Edit"
-                  icon={<FaEdit />}
-                  size="sm"
-                  onClick={() => handleEditTask(task._id)}
-                />
-                <IconButton
-                  colorScheme="red"
-                  aria-label="Delete"
-                  icon={<FaTrash />}
-                  size="sm"
-                  onClick={() => handleDeleteTask(task._id)}
-                />
-              </HStack>
-            </HStack>
-            <Text mt="2">{task.description}</Text>
-          </Box>
-        ))}
-      </VStack>
+<VStack
+  direction={["column", "row"]}
+  align="start"
+  wrap="wrap"
+  spacing={4}
+  px={2}
+  width="120%"
+>
+  {filteredTasks.map((task, index) => (
+    <Box
+      key={index}
+      borderWidth="0.5px"
+      borderRadius="25px"
+      p="4"
+      width="70%"
+      height="130px"
+      overflowY="auto"
+    >
+      <HStack justify="space-between">
+        <Heading size="md">
+          {isHeadingValid(task.title) ? task.title : null}
+        </Heading>
+        <Spacer />
+        <HStack spacing={["2", "4"]}>
+          <IconButton
+            colorScheme="teal"
+            aria-label="Edit"
+            icon={<FaEdit />}
+            size="sm"
+            onClick={() => handleEditTask(task._id)}
+          />
+          <IconButton
+            colorScheme="red"
+            aria-label="Delete"
+            icon={<FaTrash />}
+            size="sm"
+            onClick={() => handleDeleteTask(task._id)}
+          />
+        </HStack>
+      </HStack>
+      {!isHeadingValid(task.title) && (
+        <Text color="red.500" fontSize="xl" mt="2">
+          Heading must be less than 30 characters.
+          Either delete or edit the Task
+        </Text>
+      )}
+      <Text mt="2">{task.description}</Text>
+    </Box>
+  ))}
+</VStack>
       {isEditFormOpen && (
         <EditForm
           isOpen={isEditFormOpen}
